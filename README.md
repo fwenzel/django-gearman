@@ -11,7 +11,26 @@ place in django-gearman and don't unnecessarily clog your application code.
 [Gearman]: http://gearman.org
 [python-gearman]: http://github.com/samuel/python-gearman
 
-## Licensing ##
+Usage
+-----
+Copy/link/weld this app into your django project and add it to the
+`INSTALLED_APPS` section of `settings.py`.
+
+Specify the following settings in your local settings.py file:
+
+    # One or more gearman servers
+    GEARMAN_SERVERS = ['127.0.0.1']
+
+    # gearman job name pattern. Namespacing etc goes here. This is the pattern
+    # jour jobs will register as with the server, and that you'll need to use
+    # when calling them from a non-django-gearman client.
+    # replacement patterns are:
+    # %(app)s : django app name the job is filed under
+    # %(job)s : job name
+    GEARMAN_JOB_NAME = '%(app)s_%(job)s'
+
+Licensing
+---------
 This software is licensed under the [Mozilla Tri-License][MPL]:
 
     ***** BEGIN LICENSE BLOCK *****
@@ -29,12 +48,12 @@ This software is licensed under the [Mozilla Tri-License][MPL]:
 
     The Original Code is django-gearman.
 
-    The Initial Developer of the Original Code is
-    Frederic Wenzel <fwenzel@mozilla.com>.
+    The Initial Developer of the Original Code is Mozilla.
     Portions created by the Initial Developer are Copyright (C) 2010
     the Initial Developer. All Rights Reserved.
 
     Contributor(s):
+      Frederic Wenzel <fwenzel@mozilla.com>
 
     Alternatively, the contents of this file may be used under the terms of
     either the GNU General Public License Version 2 or later (the "GPL"), or
