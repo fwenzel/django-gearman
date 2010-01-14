@@ -1,6 +1,5 @@
+from django.conf import settings
 from gearman import GearmanClient, GearmanWorker, Task
-
-import settings
 
 
 class DjangoGearmanClient(GearmanClient):
