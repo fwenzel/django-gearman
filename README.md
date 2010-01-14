@@ -15,8 +15,8 @@ Installation
 ------------
 It's the same for both the client and worker instances of your django project:
 
-Copy/link/weld this app into your django project and add it to the
-`INSTALLED_APPS` section of `settings.py`.
+Copy/link/weld the `django_gearman` folder as an app into your django project
+and add it to the `INSTALLED_APPS` section of `settings.py`.
 
 Specify the following settings in your local settings.py file:
 
@@ -55,7 +55,7 @@ Clients
 -------
 To make your workers work, you need a client app passing data to them. Create
 and instance of the `django_gearman.GearmanClient` class and execute a
-`django_gearman.Task` task with it:
+`django_gearman.Task` with it:
 
     client = GearmanClient()
     res = client.do_task(Task("gearman_example.reverse", sentence))
