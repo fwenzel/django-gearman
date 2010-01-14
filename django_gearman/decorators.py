@@ -5,6 +5,7 @@ class gearman_job(object):
 
     def __init__(self, f):
         self.f = f
+        self.__name__ = f.__name__
         
         # determine app name
         parts = f.__module__.rpartition('.')
