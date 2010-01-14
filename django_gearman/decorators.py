@@ -22,5 +22,10 @@ class gearman_job(object):
             gm_module.gearman_jobs = [self]
 
     def __call__(self, *args, **kwargs):
-        return self.f(*args, **kwargs)
+        # call function with argument passed by the client only
+        try:
+            arg = args[0].arg
+        except IndexError:
+            arg = None
+        return self.f(arg)
 
