@@ -6,7 +6,7 @@ class DjangoGearmanClient(GearmanClient):
     """gearman client, automatically connecting to server"""
 
     def __init__(self, **kwargs):
-        """instanciate Gearman client with servers from settings file"""
+        """instantiate Gearman client with servers from settings file"""
         return super(DjangoGearmanClient, self).__init__(
                 settings.GEARMAN_SERVERS, **kwargs)
 
@@ -17,7 +17,7 @@ class DjangoGearmanWorker(GearmanWorker):
     """
 
     def __init__(self, **kwargs):
-        """instanciate Gearman worker with servers from settings file"""
+        """instantiate Gearman worker with servers from settings file"""
         return super(DjangoGearmanWorker, self).__init__(
                 settings.GEARMAN_SERVERS, **kwargs)
 
@@ -40,5 +40,5 @@ class DjangoGearmanTask(Task):
         except NameError:
             pass
 
-        return super(DjangoGearmanTask, self).__init__(func, args, **kwargs)
+        return super(DjangoGearmanTask, self).__init__(func, arg, **kwargs)
 
