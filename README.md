@@ -1,7 +1,7 @@
 django-gearman
 ==============
 
-*django-gearman* is a convenience wrapper for the [Gearman]
+*django-gearman* is a convenience wrapper for the [Gearman][Gearman]
 [Python Bindings][python-gearman].
 
 With django-gearman, you can code jobs as well as clients in a Django project
