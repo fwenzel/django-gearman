@@ -11,8 +11,10 @@ place in django-gearman and don't unnecessarily clog your application code.
 [Gearman]: http://gearman.org
 [python-gearman]: http://github.com/samuel/python-gearman
 
-Usage
------
+Installation
+------------
+It's the same for both the client and worker instances of your django project:
+
 Copy/link/weld this app into your django project and add it to the
 `INSTALLED_APPS` section of `settings.py`.
 
@@ -22,12 +24,48 @@ Specify the following settings in your local settings.py file:
     GEARMAN_SERVERS = ['127.0.0.1']
 
     # gearman job name pattern. Namespacing etc goes here. This is the pattern
-    # jour jobs will register as with the server, and that you'll need to use
+    # your jobs will register as with the server, and that you'll need to use
     # when calling them from a non-django-gearman client.
     # replacement patterns are:
     # %(app)s : django app name the job is filed under
     # %(job)s : job name
     GEARMAN_JOB_NAME = '%(app)s_%(job)s'
+
+Workers
+-------
+### Registering jobs
+Create a file `gearman.py` in any of your django apps, and define as many
+jobs as functions as you like. The jobs must accept a single argument as
+passed by the caller and must return the result of the operation, if
+applicable.
+
+Mark each of these functions as gearman jobs by decorating them with
+`django_gearman.decorators.gearman_job`.
+
+For an example, look at the `gearman_example` app's `gearman.py` file.
+
+### Starting a worker
+To start a worker, run `python manage.py gearman_worker`. It will start
+serving all registered jobs.
+
+Since the process will keep running while waiting for and executing jobs,
+you probably want to run this in a _screen_ session or similar.
+
+Clients
+-------
+To make your workers work, you need a client app passing data to them. Create
+and instance of the `django_gearman.GearmanClient` class and execute a
+`django_gearman.Task` task with it:
+
+    client = GearmanClient()
+    res = client.do_task(Task("gearman_example.reverse", sentence))
+    print "Result: '%s'" % res
+
+The notation for the task name is `appname.jobname`, no matter what pattern
+you have defined in `GEARMAN_JOB_NAME`.
+
+For a live example look at the `gearman_example` app, in the
+`management/commands/gearman_example_client.py` file.
 
 Licensing
 ---------
