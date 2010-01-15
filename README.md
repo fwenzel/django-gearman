@@ -30,7 +30,7 @@ Specify the following settings in your local settings.py file:
     # replacement patterns are:
     # %(app)s : django app name the job is filed under
     # %(job)s : job name
-    GEARMAN_JOB_NAME = '%(app)s_%(job)s'
+    GEARMAN_JOB_NAME = '%(app)s.%(job)s'
 
 Workers
 -------
