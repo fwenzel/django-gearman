@@ -1,14 +1,26 @@
 from django.conf import settings
-from gearman import GearmanClient, GearmanWorker, Task
+from gearman import GearmanClient, GearmanWorker, Task, Taskset
 
 
 class DjangoGearmanClient(GearmanClient):
     """gearman client, automatically connecting to server"""
 
+    def __call__(self, func, arg, uniq=None, **kwargs):
+        raise NotImplementedError('Use do_task() or dispatch_background'\
+                                  '_task() instead')
+
     def __init__(self, **kwargs):
         """instantiate Gearman client with servers from settings file"""
         return super(DjangoGearmanClient, self).__init__(
                 settings.GEARMAN_SERVERS, **kwargs)
+
+    def dispatch_background_task(self, func, arg, uniq=None, high_priority=False):
+        """Submit a background task and return its handle."""
+        task = DjangoGearmanTask(func, arg, uniq=uniq, background=True,
+                                 high_priority=high_priority)
+        taskset = Taskset([task])
+        self.do_taskset(taskset)
+        return task.handle
 
 class DjangoGearmanWorker(GearmanWorker):
     """

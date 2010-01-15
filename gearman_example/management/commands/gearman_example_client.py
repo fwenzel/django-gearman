@@ -7,12 +7,19 @@ class Command(NoArgsCommand):
     __doc__ = help
 
     def handle_noargs(self, **options):
-        sentence = "The quick brown fox jumps over the lazy dog."
+        client = GearmanClient()
 
+        print "Synchronous Gearman Call"
+        print "------------------------"
+        sentence = "The quick brown fox jumps over the lazy dog."
         print "Reversing example sentence: '%s'" % sentence
         # call "reverse" job defined in gearman_example app (i.e., this app)
-        client = GearmanClient()
         res = client.do_task(Task("gearman_example.reverse", sentence))
-
         print "Result: '%s'" % res
+        print
+
+        print "Asynchronous Gearman Call"
+        print "-------------------------"
+        print "Notice how this app exits, while the worker still works on the task."
+        client.dispatch_background_task('gearman_example.background_counting', None)
 
