@@ -1,2 +1,3 @@
 * Client: Dispatch background tasks
 * Client: __call__ shorthand notation
+* Worker: Maybe forking multiple children?
