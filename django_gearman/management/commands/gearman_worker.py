@@ -75,6 +75,10 @@ class Command(NoArgsCommand):
         - worker_count, positive int
         - jobs: list of gearman jobs
         """
+        # no need for forking if there's only one worker
+        if worker_count == 1:
+            return self.work(jobs)
+
         print "Spawning %s worker(s)" % worker_count
         # spawn children and make them work (hello, 19th century!)
         for i in range(worker_count):
