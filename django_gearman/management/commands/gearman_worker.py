@@ -4,7 +4,7 @@ from django_gearman import GearmanWorker
 
 
 class Command(NoArgsCommand):
-    help = "Start a Gearman worker serving all registered German jobs"
+    help = "Start a Gearman worker serving all registered Gearman jobs"
     __doc__ = help
 
     def handle_noargs(self, **options):
