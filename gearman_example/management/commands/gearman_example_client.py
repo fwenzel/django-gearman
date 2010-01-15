@@ -20,6 +20,9 @@ class Command(NoArgsCommand):
 
         print "Asynchronous Gearman Call"
         print "-------------------------"
-        print "Notice how this app exits, while the worker still works on the task."
-        client.dispatch_background_task('gearman_example.background_counting', None)
+        print "Notice how this app exits, while the workers still work on the tasks."
+        for i in range(4):
+            client.dispatch_background_task(
+                'gearman_example.background_counting', None
+            )
 

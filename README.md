@@ -49,6 +49,13 @@ For an example, look at the `gearman_example` app's `gearman.py` file.
 To start a worker, run `python manage.py gearman_worker`. It will start
 serving all registered jobs.
 
+To spawn more than one worker (if, e.g., most of your jobs are I/O bound),
+use the `-w` option:
+
+    python manage.py gearman_worker 5
+
+will start five workers.
+
 Since the process will keep running while waiting for and executing jobs,
 you probably want to run this in a _screen_ session or similar.
 
@@ -72,6 +79,19 @@ Dispatching a background event without waiting for the result is easy as well:
 
 For a live example look at the `gearman_example` app, in the
 `management/commands/gearman_example_client.py` file.
+
+Example App
+-----------
+For a full, working, example application, add `gearman_example` to your
+`INSTALLED_APPS`, then run a worker in one shell:
+
+    python manage.py gearman_worker -w 4
+
+and execute the example app in another:
+
+    python manage.py gearman_example_client
+
+You can see the client sending data and the worker(s) working on it.
 
 Licensing
 ---------
