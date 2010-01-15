@@ -8,9 +8,9 @@ class gearman_job(object):
         self.__name__ = f.__name__
         
         # determine app name
-        parts = f.__module__.rpartition('.')
-        if parts[2]:
-            self.app = parts[0]
+        parts = f.__module__.split('.')
+        if len(parts) > 1:
+            self.app = parts[-2]
         else:
             self.app = ''
 
