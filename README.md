@@ -52,7 +52,7 @@ serving all registered jobs.
 To spawn more than one worker (if, e.g., most of your jobs are I/O bound),
 use the `-w` option:
 
-    python manage.py gearman_worker 5
+    python manage.py gearman_worker -w 5
 
 will start five workers.
 
