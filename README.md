@@ -15,8 +15,9 @@ Installation
 ------------
 It's the same for both the client and worker instances of your django project:
 
-Copy/link/weld the `django_gearman` folder as an app into your django project
-and add it to the `INSTALLED_APPS` section of `settings.py`.
+    pip install -e git://github.com/fwenzel/django-gearman.git#egg=django-gearman
+
+Add ``django_gearman`` to the `INSTALLED_APPS` section of `settings.py`.
 
 Specify the following settings in your local settings.py file:
 
