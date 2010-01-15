@@ -1,3 +1,5 @@
+import sys
+
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django_gearman import GearmanWorker
@@ -39,6 +41,9 @@ class Command(NoArgsCommand):
                 worker.register_function(func, job)
 
         # start working
-        print "Starting to work..."
-        worker.work()
+        print "Starting to work... (press ^C to exit)"
+        try:
+            worker.work()
+        except KeyboardInterrupt:
+            sys.exit(0)
 
