@@ -38,7 +38,7 @@ Workers
 Create a file `gearman.py` in any of your django apps, and define as many
 jobs as functions as you like. The jobs must accept a single argument as
 passed by the caller and must return the result of the operation, if
-applicable.
+applicable. (Note: It must accept an argument, even if you don't use it).
 
 Mark each of these functions as gearman jobs by decorating them with
 `django_gearman.decorators.gearman_job`.
@@ -65,6 +65,10 @@ and instance of the `django_gearman.GearmanClient` class and execute a
 
 The notation for the task name is `appname.jobname`, no matter what pattern
 you have defined in `GEARMAN_JOB_NAME`.
+
+Dispatching a background event without waiting for the result is easy as well:
+
+    client.dispatch_background_task('gearman_example.background_counting', None)
 
 For a live example look at the `gearman_example` app, in the
 `management/commands/gearman_example_client.py` file.
