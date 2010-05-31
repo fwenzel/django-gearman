@@ -1,6 +1,6 @@
 class gearman_job(object):
     """
-    Decorator marking a function inside some_app/gearman.py as a gearman job
+    Decorator marking a function inside some_app/gearman_jobs.py as a gearman job
     """
 
     def __init__(self, f):
@@ -17,9 +17,9 @@ class gearman_job(object):
         # store function in per-app job list (to be picked up by a worker)
         gm_module = __import__(f.__module__)
         try:
-            gm_module.gearman_jobs.append(self)
+            gm_module.gearman_job_list.append(self)
         except AttributeError:
-            gm_module.gearman_jobs = [self]
+            gm_module.gearman_job_list = [self]
 
     def __call__(self, *args, **kwargs):
         # call function with argument passed by the client only

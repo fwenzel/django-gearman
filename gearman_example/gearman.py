@@ -1,6 +1,6 @@
 """
 Example Gearman Job File.
-Needs to be called gearman.py and reside inside a registered Django app.
+Needs to be called gearman_jobs.py and reside inside a registered Django app.
 """
 import os
 import time

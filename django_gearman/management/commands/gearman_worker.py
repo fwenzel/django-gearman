@@ -21,7 +21,7 @@ class Command(NoArgsCommand):
         gm_modules = []
         for app in settings.INSTALLED_APPS:
             try:
-                gm_modules.append(__import__("%s.gearman" % app))
+                gm_modules.append(__import__("%s.gearman_jobs" % app))
             except ImportError:
                 pass
         if not gm_modules:
@@ -32,10 +32,10 @@ class Command(NoArgsCommand):
         jobs = []
         for gm_module in gm_modules:
             try:
-                gm_module.gearman_jobs
+                gm_module.gearman_job_list
             except AttributeError:
                 continue
-            jobs += gm_module.gearman_jobs
+            jobs += gm_module.gearman_job_list
         if not jobs:
             print "No gearman jobs found!"
             return
