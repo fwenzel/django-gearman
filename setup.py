@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-gearman',
-    version='0.0.1',
+    version='0.2',
     description='A convenience wrapper for Gearman clients and workers '
                 'in Django/Python',
     long_description=open('README.md').read(),
