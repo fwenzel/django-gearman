@@ -35,7 +35,7 @@ Specify the following settings in your local settings.py file:
 Workers
 -------
 ### Registering jobs
-Create a file `gearman.py` in any of your django apps, and define as many
+Create a file `gearman_jobs.py` in any of your django apps, and define as many
 jobs as functions as you like. The jobs must accept a single argument as
 passed by the caller and must return the result of the operation, if
 applicable. (Note: It must accept an argument, even if you don't use it).
@@ -43,7 +43,7 @@ applicable. (Note: It must accept an argument, even if you don't use it).
 Mark each of these functions as gearman jobs by decorating them with
 `django_gearman.decorators.gearman_job`.
 
-For an example, look at the `gearman_example` app's `gearman.py` file.
+For an example, look at the `gearman_example` app's `gearman_jobs.py` file.
 
 ### Starting a worker
 To start a worker, run `python manage.py gearman_worker`. It will start
