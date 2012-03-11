@@ -65,7 +65,7 @@ To make your workers work, you need a client app passing data to them. Create
 and instance of the `django_gearman.GearmanClient` class and execute a
 `django_gearman.Task` with it:
 
-    from gearman import GearmanClient, Task
+    from django_gearman import GearmanClient, Task
     client = GearmanClient()
     res = client.do_task(Task("gearman_example.reverse", sentence))
     print "Result: '%s'" % res
