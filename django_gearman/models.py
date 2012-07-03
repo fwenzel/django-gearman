@@ -1,6 +1,7 @@
-from django.conf import settings
-import gearman
 import pickle
+
+import gearman
+from django.conf import settings
 
 
 class PickleDataEncoder(gearman.DataEncoder):
@@ -14,11 +15,12 @@ class PickleDataEncoder(gearman.DataEncoder):
 
 
 class DjangoGearmanClient(gearman.GearmanClient):
+    """Gearman client, automatically connecting to server."""
+
     data_encoder = PickleDataEncoder
-    """gearman client, automatically connecting to server"""
 
     def __call__(self, func, arg, uniq=None, **kwargs):
-        raise NotImplementedError('Use do_task() or dispatch_background'\
+        raise NotImplementedError('Use do_task() or dispatch_background'
                                   '_task() instead')
 
     def __init__(self, **kwargs):
@@ -27,9 +29,7 @@ class DjangoGearmanClient(gearman.GearmanClient):
                 settings.GEARMAN_SERVERS, **kwargs)
 
     def dispatch_background_task(self, func, arg, uniq=None, high_priority=False):
-        """
-            Submit a background task and return its handle.
-        """
+        """Submit a background task and return its handle."""
         
         priority = None
         if high_priority:
@@ -37,14 +37,15 @@ class DjangoGearmanClient(gearman.GearmanClient):
         request = self.submit_job(func, arg, unique=uniq, wait_until_complete=False, priority=priority)
         return request
 
+
 class DjangoGearmanWorker(gearman.GearmanWorker):
     """
-    gearman worker, automatically connecting to server and discovering
-    available jobs
+    Gearman worker, automatically connecting to server and discovering
+    available jobs.
     """
     data_encoder = PickleDataEncoder
     
     def __init__(self, **kwargs):
-        """instantiate Gearman worker with servers from settings file"""
+        """Instantiate Gearman worker with servers from settings file."""
         return super(DjangoGearmanWorker, self).__init__(
                 settings.GEARMAN_SERVERS, **kwargs)

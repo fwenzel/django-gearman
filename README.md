@@ -60,27 +60,30 @@ Since the process will keep running while waiting for and executing jobs,
 you probably want to run this in a _screen_ session or similar.
 
 ### Task queues
-Queues are virtual abstract layer built on top of gearman tasks. The easy way of
-describing it is the following example: Let's say, you have task for fetching 
-e-mails from the server, some task for sending the emails and one more task for
-sending the SMS via sms gateway. The problem you may encounter is that the email
-fetching tasks may effectively 'block' the worker (in a sense, that there will be
-so many of them (or they will be so time-taking for that matter) that no other task 
-will be able to pass through). Of course one solution would be to add more workers 
-(via -w parameter), but it can be a short-time win. You can use queues instead. 
+Queues are a virtual abstraction layer built on top of gearman tasks. An
+easy way to describe it is the following example: Imagine you have a task
+for fetching e-mails from the server, another task for sending the emails
+and one more task for sending SMS via an SMS gateway. A problem you may
+encounter is that the email fetching tasks may effectively "block" the worker
+(there could be so many of them, it could be so time-consuming, that no other
+task would be able to pass through). Of course, one solution would be to add
+more workers (via the ``-w`` parameter), but that would only temporarily
+solve the problem. This is where queues come in.
 
-The first thing to do is to pass a queue into job description, like that:
+The first thing to do is to pass a queue name into the job description, like
+this:
 
-@gearman_job(queue="my-queue-name")
-def some_job(some_arg):
-    pass
+    @gearman_job(queue="my-queue-name")
+    def some_job(some_arg):
+        pass
     
-You may then proceed to starting the worker that is bound to the specific queue:
+You may then proceed to starting the worker that is bound to the specific
+queue:
 
     python manage.py gearman_worker -w 5 -q my-queue-name
     
-Be aware of the fact, that when you don't specify the queue name, the worker will 
-take care of all of the tasks.
+Be aware of the fact that when you don't specify the queue name, the worker
+will take care of all tasks.
 
 Clients
 -------

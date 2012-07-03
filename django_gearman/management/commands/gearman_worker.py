@@ -8,7 +8,6 @@ from django_gearman import GearmanWorker
 
 
 class Command(NoArgsCommand):
-    ALL_QUEUES = '*'
     help = "Start a Gearman worker serving all registered Gearman jobs"
     __doc__ = help
     option_list = NoArgsCommand.option_list + (
@@ -17,7 +16,9 @@ class Command(NoArgsCommand):
         make_option('-q', '--queue', action='store', dest='queue',
                     default=ALL_QUEUES, help='Queue to register tasks from'),
     )
-    children = [] # list of worker processes
+
+    ALL_QUEUES = '*'
+    children = [] # List of worker processes
 
     @staticmethod
     def get_gearman_enabled_modules():
@@ -86,6 +87,7 @@ class Command(NoArgsCommand):
     def spawn_workers(self, worker_count, jobs):
         """
         Spawn as many workers as desired (at least 1).
+
         Accepts:
         - worker_count, positive int
         - jobs: list of gearman jobs
@@ -106,7 +108,7 @@ class Command(NoArgsCommand):
                 break
 
     def work(self, jobs):
-        """children only: register all jobs, start working"""
+        """Children only: register all jobs, start working."""
         worker = GearmanWorker()
         for job in jobs:
             worker.register_task(job.register_as, job)
