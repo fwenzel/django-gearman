@@ -8,6 +8,7 @@ from django_gearman import GearmanWorker
 
 
 class Command(NoArgsCommand):
+    ALL_QUEUES = '*'
     help = "Start a Gearman worker serving all registered Gearman jobs"
     __doc__ = help
     option_list = NoArgsCommand.option_list + (
@@ -17,7 +18,6 @@ class Command(NoArgsCommand):
                     default=ALL_QUEUES, help='Queue to register tasks from'),
     )
 
-    ALL_QUEUES = '*'
     children = [] # List of worker processes
 
     @staticmethod
@@ -58,15 +58,7 @@ class Command(NoArgsCommand):
         self.stdout.write("Available jobs:\n")
         for job in jobs:
             # determine right name to register function with
-            app = job.app
-            jobname = job.__name__
-            try:
-                func = settings.GEARMAN_JOB_NAME % {'app': app,
-                                                    'job': jobname}
-            except NameError:
-                func = '%s.%s' % (app, jobname)
-            job.register_as = func
-            self.stdout.write("* %s\n" % func)
+            self.stdout.write("* %s\n" % job.__name__)
 
         # spawn all workers and register all jobs
         try:
@@ -111,7 +103,7 @@ class Command(NoArgsCommand):
         """Children only: register all jobs, start working."""
         worker = GearmanWorker()
         for job in jobs:
-            worker.register_task(job.register_as, job)
+            worker.register_task(job.__name__, job)
         try:
             worker.work()
         except KeyboardInterrupt:
