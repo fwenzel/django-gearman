@@ -8,16 +8,19 @@ from django_gearman import GearmanWorker
 
 
 class Command(NoArgsCommand):
+    ALL_QUEUES = '*'
     help = "Start a Gearman worker serving all registered Gearman jobs"
     __doc__ = help
     option_list = NoArgsCommand.option_list + (
         make_option('-w', '--workers', action='store', dest='worker_count',
                     default='1', help='Number of workers to spawn.'),
+        make_option('-q', '--queue', action='store', dest='queue',
+                    default=ALL_QUEUES, help='Queue to register tasks from'),
     )
     children = [] # list of worker processes
-
-    def handle_noargs(self, **options):
-        # find gearman modules
+    
+    @staticmethod
+    def get_gearman_enabled_modules():
         gm_modules = []
         for app in settings.INSTALLED_APPS:
             try:
@@ -25,9 +28,17 @@ class Command(NoArgsCommand):
             except ImportError:
                 pass
         if not gm_modules:
-            print "No gearman modules found!"
+            self.stdout.write("No gearman modules found!")
+            return None
+        return gm_modules
+        
+    
+    def handle_noargs(self, **options):
+        queue = options["queue"]
+        # find gearman modules
+        gm_modules = Command.get_gearman_enabled_modules()
+        if not gm_modules:
             return
-
         # find all jobs
         jobs = []
         for gm_module in gm_modules:
@@ -35,7 +46,11 @@ class Command(NoArgsCommand):
                 gm_module.gearman_job_list
             except AttributeError:
                 continue
-            jobs += gm_module.gearman_job_list
+            if queue == Command.ALL_QUEUES:
+                for _jobs in gm_module.gearman_job_list.itervalues():
+                    jobs += _jobs
+            else:
+                jobs += gm_module.gearman_job_list.get(queue, [])
         if not jobs:
             print "No gearman jobs found!"
             return
@@ -94,7 +109,7 @@ class Command(NoArgsCommand):
         """children only: register all jobs, start working"""
         worker = GearmanWorker()
         for job in jobs:
-            worker.register_function(job.register_as, job)
+            worker.register_task(job.register_as, job)
         try:
             worker.work()
         except KeyboardInterrupt:

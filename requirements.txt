@@ -1,2 +1,2 @@
 # pip requirements file
-gearman==1.5.0
+gearman==2.0.2
