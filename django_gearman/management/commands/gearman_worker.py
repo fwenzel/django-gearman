@@ -18,7 +18,7 @@ class Command(NoArgsCommand):
                     default=ALL_QUEUES, help='Queue to register tasks from'),
     )
     children = [] # list of worker processes
-    
+
     @staticmethod
     def get_gearman_enabled_modules():
         gm_modules = []
@@ -28,16 +28,16 @@ class Command(NoArgsCommand):
             except ImportError:
                 pass
         if not gm_modules:
-            self.stdout.write("No gearman modules found!")
             return None
         return gm_modules
-        
-    
+
+
     def handle_noargs(self, **options):
         queue = options["queue"]
         # find gearman modules
         gm_modules = Command.get_gearman_enabled_modules()
         if not gm_modules:
+            self.stderr.write("No gearman modules found!\n")
             return
         # find all jobs
         jobs = []
@@ -52,9 +52,9 @@ class Command(NoArgsCommand):
             else:
                 jobs += gm_module.gearman_job_list.get(queue, [])
         if not jobs:
-            print "No gearman jobs found!"
+            self.stderr.write("No gearman jobs found!\n")
             return
-        print "Available jobs:"
+        self.stdout.write("Available jobs:\n")
         for job in jobs:
             # determine right name to register function with
             app = job.app
@@ -65,7 +65,7 @@ class Command(NoArgsCommand):
             except NameError:
                 func = '%s.%s' % (app, jobname)
             job.register_as = func
-            print "* %s" % func
+            self.stdout.write("* %s\n" % func)
 
         # spawn all workers and register all jobs
         try:
@@ -76,7 +76,7 @@ class Command(NoArgsCommand):
         self.spawn_workers(worker_count, jobs)
 
         # start working
-        print "Starting to work... (press ^C to exit)"
+        self.stdout.write("Starting to work... (press ^C to exit)\n")
         try:
             for child in self.children:
                 os.waitpid(child, 0)
@@ -94,7 +94,7 @@ class Command(NoArgsCommand):
         if worker_count == 1:
             return self.work(jobs)
 
-        print "Spawning %s worker(s)" % worker_count
+        self.stdout.write("Spawning %s worker(s)\n" % worker_count)
         # spawn children and make them work (hello, 19th century!)
         for i in range(worker_count):
             child = os.fork()
