@@ -1,4 +1,4 @@
-def gearman_job(queue='default'):
+def gearman_job(queue='default', name=None):
     """
     Decorator turning a function inside some_app/gearman_jobs.py into a
     Gearman job.
@@ -8,15 +8,16 @@ def gearman_job(queue='default'):
 
         def __init__(self, f):
             self.f = f
-            self.__name__ = f.__name__
+            # set the custom task name
+            self.__name__ = name
+            # if it's null, set the import name as the task name
+            # this also saves one line (no else clause) :)
+            if not name:
+                self.__name__ = '.'.join(
+                    (f.__module__.replace('.gearman_jobs', ''), f.__name__)
+                )
+                                    
             self.queue = queue
-
-            # Determine app name.
-            parts = f.__module__.split('.')
-            if len(parts) > 1:
-                self.app = parts[-2]
-            else:
-                self.app = ''
 
             # Store function in per-app job list (to be picked up by a
             # worker).

@@ -19,18 +19,10 @@ It's the same for both the client and worker instances of your django project:
 
 Add ``django_gearman`` to the `INSTALLED_APPS` section of `settings.py`.
 
-Specify the following settings in your local settings.py file:
+Specify the following setting in your local settings.py file:
 
     # One or more gearman servers
     GEARMAN_SERVERS = ['127.0.0.1']
-
-    # gearman job name pattern. Namespacing etc goes here. This is the pattern
-    # your jobs will register as with the server, and that you'll need to use
-    # when calling them from a non-django-gearman client.
-    # replacement patterns are:
-    # %(app)s : django app name the job is filed under
-    # %(job)s : job name
-    GEARMAN_JOB_NAME = '%(app)s.%(job)s'
 
 Workers
 -------
@@ -45,6 +37,15 @@ Mark each of these functions as gearman jobs by decorating them with
 
 For an example, look at the `gearman_example` app's `gearman_jobs.py` file.
 
+### Job naming
+The tasks are given a default name of their import path, with the phrase
+'gearman_jobs' stripped out of them, for readability reasons. You can override
+the task name, by specifying `name` parameter of the decorator. Here's how:
+
+    @gearman_job(name='my-task-name')
+    def my_task_function(foo):
+        pass
+        
 ### Starting a worker
 To start a worker, run `python manage.py gearman_worker`. It will start
 serving all registered jobs.
