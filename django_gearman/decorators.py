@@ -13,8 +13,10 @@ def gearman_job(queue='default', name=None):
             # if it's null, set the import name as the task name
             # this also saves one line (no else clause) :)
             if not name:
-                self.__name__ = '.'.join((f.__module__, f.__name__)) \
-                                    .replace('gearman_jobs.', '')
+                self.__name__ = '.'.join(
+                    (f.__module__.replace('.gearman_jobs', ''), f.__name__)
+                )
+                                    
             self.queue = queue
 
             # Store function in per-app job list (to be picked up by a
