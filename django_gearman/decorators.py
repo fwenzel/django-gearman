@@ -31,10 +31,7 @@ def gearman_job(queue='default', name=None):
 
         def __call__(self, worker, job, *args, **kwargs):
             # Call function with argument passed by the client only.
-            try:
-                arg = job.data
-            except IndexError:
-                arg = None
-            return self.f(arg)
+            job_args = job.data
+            return self.f(*job_args["args"], **job_args["kwargs"])
 
     return gearman_job_cls

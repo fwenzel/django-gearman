@@ -46,6 +46,83 @@ the task name, by specifying `name` parameter of the decorator. Here's how:
     def my_task_function(foo):
         pass
         
+### Task parameters
+The gearman specifies, that the job function can accept one parameter (usually
+it is reffered to as ``data`` parameter). Sometimes it may not be enough. For
+example, gearman only allows to pass a string as ``data`` parameter. What if you
+would like to pass an array or a dict? You would need to serialize and deserialize
+them. Fortunately, django-gearman can take care of this, so that you can spend
+all of your time on coding the actual task.
+
+    @gearman_job(name='my-task-name')
+    def my_task_function(foo):
+        pass
+    
+    client.submit_job('my-task-name', {'foo':'becomes', 'this':'dict'})
+    client.submit_job('my-task-name', Decimal(1.0))
+
+### Tasks with more than one parameter
+
+You can pass as many arguments as you want, of whatever type you like.
+Here's an example job definition:
+
+    @gearman_job(name='my-task-name')
+    def my_task_function(one, two, three):
+        pass
+        
+You can execute this function in two different ways:
+
+    client.submit_job('my-task-name', one=1, two=2, three=3)
+    client.submit_job('my-task-name', args=[1,2,3])
+    
+Unfortunetely, executing it like that
+    
+    client.submit_job('my-task-name', 1,2,3)
+    
+Would produce the error, simply because ``submit_job`` from gearman's python bindings
+contains __a lot__ of arguments and it's much easier to specify them via keyword names
+or special ``args`` keyword than to type something like 7 None's instead:
+
+    client.submit_job('my-task-name', None, None, None, None, None, None, None, 1, 2, 3)
+    
+The only limitation that you have are gearman reserved keyword parameters. As of
+gearman 2.0.2 these are:
+
+    * data
+    * unique
+    * priority
+    * background
+    * wait_until_complete
+    * max_retries
+    * poll_timeout
+    
+So, when you want your job definition to have, for example, ``unique`` or ``background``
+keyword parameter, you need to execute the job in a special, more verbose way. Here's an
+example of such job, and it's execution.
+
+    @gearman_job(name='my-task-name')
+    def my_task_function(background, unique):
+        pass
+        
+    client.submit_job('my-task-name', kwargs={"background": True, "unique": False})
+    client.submit_job('my-task-name', args=[True,False])
+    
+Now, for the final stride:
+
+    client.submit_job('my-task-name', background=True, unique=True, kwargs={"background": False, "unique": False})
+    
+Don't panic, your task is safe! That's because you're using ``kwargs`` directly. Therefore,
+gearman's bindings would recieve ``True`` for ``submit_job`` function, whether your task would
+recieve ``False``.
+
+However, executing the task like this:
+
+    client.submit_job('my-task-name', background=True, unique=True)
+    
+would lead to a disaster of unimaginable proportions! Both ``background`` and ``unique`` arguments
+would be swallowed by submit_job function and wouldn't made it to your task! Therefore always remember
+to double-check your parameter names with the reserved words list.
+
 ### Starting a worker
 To start a worker, run `python manage.py gearman_worker`. It will start
 serving all registered jobs.
