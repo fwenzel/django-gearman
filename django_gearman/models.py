@@ -105,5 +105,4 @@ class DjangoGearmanWorker(gearman.GearmanWorker):
     def register_task(self, task_name, task):
         if callable(task_name_decorator):
             task_name = task_name_decorator(task_name)
-        print(task_name)
         return super(DjangoGearmanWorker, self).register_task(task_name, task)
