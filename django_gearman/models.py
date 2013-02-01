@@ -1,14 +1,17 @@
 import pickle
-from zlib import adler32
 from os import getcwd
+from zlib import adler32
+
 import gearman
+
 from django.conf import settings
 
 
 def default_taskname_decorator(task_name):
     return "%s.%s" % (str(adler32(getcwd()) & 0xffffffff), task_name)
 
-task_name_decorator = getattr(settings, 'GEARMAN_JOB_NAME', default_taskname_decorator)
+task_name_decorator = getattr(settings, 'GEARMAN_JOB_NAME',
+                              default_taskname_decorator)
 
 
 class PickleDataEncoder(gearman.DataEncoder):
@@ -34,13 +37,13 @@ class DjangoGearmanClient(gearman.GearmanClient):
         """instantiate Gearman client with servers from settings file"""
         return super(DjangoGearmanClient, self).__init__(
                 settings.GEARMAN_SERVERS, **kwargs)
-    
+
     def parse_data(self, arg, args=None, kwargs=None, *arguments, **karguments):
         data = {
             "args": [],
             "kwargs": {}
         }
-        
+
         # The order is significant:
         # - First, use pythonic *args and/or **kwargs.
         # - If someone provided explicit declaration of args/kwargs, use those
@@ -51,42 +54,42 @@ class DjangoGearmanClient(gearman.GearmanClient):
             data["args"] = arguments
         elif args:
             data["args"] = args
-        
+
         data["kwargs"].update(karguments)
         data["kwargs"].update(kwargs)
-        
-        return data        
+
+        return data
 
     def submit_job(
         self, task, orig_data = None, unique=None, priority=None,
         background=False, wait_until_complete=True, max_retries=0,
-        poll_timeout=None, args=None, kwargs=None, *arguments, **karguments):        
+        poll_timeout=None, args=None, kwargs=None, *arguments, **karguments):
         """
         Handle *args and **kwargs before passing it on to GearmanClient's
         submit_job function.
         """
         if callable(task_name_decorator):
             task = task_name_decorator(task)
-        
+
         data = self.parse_data(orig_data, args, kwargs, *arguments, **karguments)
-        
+
         return super(DjangoGearmanClient, self).submit_job(
             task, data, unique, priority, background, wait_until_complete,
             max_retries, poll_timeout)
-    
+
     def dispatch_background_task(
         self, func, arg = None, uniq=None, high_priority=False, args=None,
         kwargs=None, *arguments, **karguments):
         """Submit a background task and return its handle."""
-        
+
         priority = None
         if high_priority:
             priority = gearman.PRIORITY_HIGH
-            
+
         request = self.submit_job(func, arg, unique=uniq,
             wait_until_complete=False, priority=priority, args=args,
             kwargs=kwargs, *arguments, **karguments)
-        
+
         return request
 
 
@@ -96,12 +99,12 @@ class DjangoGearmanWorker(gearman.GearmanWorker):
     available jobs.
     """
     data_encoder = PickleDataEncoder
-    
+
     def __init__(self, **kwargs):
         """Instantiate Gearman worker with servers from settings file."""
         return super(DjangoGearmanWorker, self).__init__(
                 settings.GEARMAN_SERVERS, **kwargs)
-    
+
     def register_task(self, task_name, task):
         if callable(task_name_decorator):
             task_name = task_name_decorator(task_name)

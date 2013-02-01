@@ -45,41 +45,28 @@ the task name by specifying `name` parameter of the decorator. Here's how:
     @gearman_job(name='my-task-name')
     def my_task_function(foo):
         pass
-        
-### ``GEARMAN_JOB_NAME`` method
-GEARMAN_JOB_NAME is the lambda function which takes original task name as
-an argument, and returns altered version of the task name. Very important thing
-to note here is that this changes the internal naming only! So you submit your job
-like you would normally do, only it has a different internal name.
 
-The default behaviour of this method is as follows:
+### Gearman-internal job naming: ``GEARMAN_JOB_NAME``
+The setting ``GEARMAN_JOB_NAME`` is a function which takes the original task
+name as an argument and returns the gearman-internal version of that task
+name. This allows you to map easily usable names in your application to more
+complex, unique ones inside gearman.
 
-    new_task_name = crc32(getcwd()) + '.' + task_name
-    
-This may seem like a very strange idea, but it is there for a reason. Namely, the
-task name uniqueness.
+The default behavior of this method is as follows:
 
-Let's imagine you have two instances of the same project on the same machine.
-Typical situation would be one instance being the test/development instance and
-the other one being the production one. So naturally you submit a job like you normally
-would do:
+    new_task_name = '%s.%s' % (crc32(getcwd()), task_name)
 
-    client.submit_job('send_mail', ...)
-    
-Only now, gearman wouldn't know which worker should process the task. Should it be
-the production one? Or the testing? hash of getcwd() solves this issue, because the
-production environment is located in different location than the testing, and your
-call is transparently renamed to
+This way several instances of the same application can be run on the same
+server. You may want to change it if you have several, independent instances
+of the same application run against a shared gearman server.
 
-    client.submit_job('some-hash.send_mail', ...)
-
-If you would like to change this behaviour, simply define GEARMAN_JOB_NAME function
-in the settings:
+If you would like to change this behavior, simply define the
+``GEARMAN_JOB_NAME`` function in the ``settings.py``:
 
     GEARMAN_JOB_NAME = lambda name: name
-    
+
 which would leave the internal task name unchanged.
-        
+
 ### Task parameters
 The gearman docs specify that the job function can accept only one parameter
 (usually refered to as the ``data`` parameter). Additionally, that parameter
@@ -91,7 +78,7 @@ all of your time on coding the actual task.
     @gearman_job(name='my-task-name')
     def my_task_function(foo):
         pass
-    
+
     client.submit_job('my-task-name', {'foo': 'becomes', 'this': 'dict'})
     client.submit_job('my-task-name', Decimal(1.0))
 
@@ -103,16 +90,16 @@ you like. Here's an example job definition:
     @gearman_job(name='my-task-name')
     def my_task_function(one, two, three):
         pass
-        
+
 You can execute this function in two different ways:
 
     client.submit_job('my-task-name', one=1, two=2, three=3)
     client.submit_job('my-task-name', args=[1, 2, 3])
-    
+
 Unfortunately, executing it like this:
-    
+
     client.submit_job('my-task-name', 1, 2, 3)
-    
+
 would produce the error, because ``submit_job`` from Gearman's Python bindings
 contains __a lot__ of arguments and it's much easier to specify them via
 keyword names or a special ``args`` keyword than to type something like seven
@@ -130,7 +117,7 @@ Gearman 2.0.2 these are:
     * wait_until_complete
     * max_retries
     * poll_timeout
-    
+
 So, if you want your job definition to have, for example, ``unique`` or
 ``background`` keyword parameters, you need to execute the job in a special,
 more verbose way. Here's an example of such a job and its execution.
@@ -138,14 +125,14 @@ more verbose way. Here's an example of such a job and its execution.
     @gearman_job(name='my-task-name')
     def my_task_function(background, unique):
         pass
-        
+
     client.submit_job('my-task-name', kwargs={"background": True, "unique": False})
     client.submit_job('my-task-name', args=[True, False])
-    
+
 Finally:
 
     client.submit_job('my-task-name', background=True, unique=True, kwargs={"background": False, "unique": False})
-    
+
 Don't panic, your task is safe! That's because you're using ``kwargs``
 directly. Therefore, Gearman's bindings would receive ``True`` for
 ``submit_job`` function, while your task would receive ``False``.
@@ -184,12 +171,12 @@ this:
     @gearman_job(queue="my-queue-name")
     def some_job(some_arg):
         pass
-    
+
 You may then proceed to starting the worker that is bound to the specific
 queue:
 
     python manage.py gearman_worker -w 5 -q my-queue-name
-    
+
 Be aware of the fact that when you don't specify the queue name, the worker
 will take care of all tasks.
 
