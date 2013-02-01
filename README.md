@@ -46,6 +46,40 @@ the task name by specifying `name` parameter of the decorator. Here's how:
     def my_task_function(foo):
         pass
         
+### ``GEARMAN_JOB_NAME`` method
+GEARMAN_JOB_NAME is the lambda function which takes original task name as
+an argument, and returns altered version of the task name. Very important thing
+to note here is that this changes the internal naming only! So you submit your job
+like you would normally do, only it has a different internal name.
+
+The default behaviour of this method is as follows:
+
+    new_task_name = crc32(getcwd()) + '.' + task_name
+    
+This may seem like a very strange idea, but it is there for a reason. Namely, the
+task name uniqueness.
+
+Let's imagine you have two instances of the same project on the same machine.
+Typical situation would be one instance being the test/development instance and
+the other one being the production one. So naturally you submit a job like you normally
+would do:
+
+    client.submit_job('send_mail', ...)
+    
+Only now, gearman wouldn't know which worker should process the task. Should it be
+the production one? Or the testing? hash of getcwd() solves this issue, because the
+production environment is located in different location than the testing, and your
+call is transparently renamed to
+
+    client.submit_job('some-hash.send_mail', ...)
+
+If you would like to change this behaviour, simply define GEARMAN_JOB_NAME function
+in the settings:
+
+    GEARMAN_JOB_NAME = lambda name: name
+    
+which would leave the internal task name unchanged.
+        
 ### Task parameters
 The gearman docs specify that the job function can accept only one parameter
 (usually refered to as the ``data`` parameter). Additionally, that parameter

@@ -1,7 +1,14 @@
 import pickle
-
+from zlib import adler32
+from os import getcwd
 import gearman
 from django.conf import settings
+
+
+def default_taskname_decorator(task_name):
+    return "%s.%s" % (str(adler32(getcwd()) & 0xffffffff), task_name)
+
+task_name_decorator = getattr(settings, 'GEARMAN_JOB_NAME', default_taskname_decorator)
 
 
 class PickleDataEncoder(gearman.DataEncoder):
@@ -53,11 +60,14 @@ class DjangoGearmanClient(gearman.GearmanClient):
     def submit_job(
         self, task, orig_data = None, unique=None, priority=None,
         background=False, wait_until_complete=True, max_retries=0,
-        poll_timeout=None, args=None, kwargs=None, *arguments, **karguments):
+        poll_timeout=None, args=None, kwargs=None, *arguments, **karguments):        
         """
         Handle *args and **kwargs before passing it on to GearmanClient's
         submit_job function.
         """
+        if callable(task_name_decorator):
+            task = task_name_decorator(task)
+        
         data = self.parse_data(orig_data, args, kwargs, *arguments, **karguments)
         
         return super(DjangoGearmanClient, self).submit_job(
@@ -91,3 +101,8 @@ class DjangoGearmanWorker(gearman.GearmanWorker):
         """Instantiate Gearman worker with servers from settings file."""
         return super(DjangoGearmanWorker, self).__init__(
                 settings.GEARMAN_SERVERS, **kwargs)
+    
+    def register_task(self, task_name, task):
+        if callable(task_name_decorator):
+            task_name = task_name_decorator(task_name)
+        return super(DjangoGearmanWorker, self).register_task(task_name, task)
