@@ -56,7 +56,10 @@ class DjangoGearmanClient(gearman.GearmanClient):
             data["args"] = args
 
         data["kwargs"].update(karguments)
-        data["kwargs"].update(kwargs)
+        # We must ensure if kwargs actually exist,
+        # Otherwise 'NoneType' is not iterable is thrown
+        if kwargs:
+            data["kwargs"].update(kwargs)
 
         return data
 
